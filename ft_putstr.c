@@ -6,7 +6,7 @@
 /*   By: kmarguir <kmarguir@learner.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/15 20:30:10 by kmarguir          #+#    #+#             */
-/*   Updated: 2026/11/15 20:36:31 by kmarguir         ###   ########.fr       */
+/*   Updated: 2026/11/22 19:22:11 by kmarguir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,12 @@ int	ft_putstr(char *str)
 {
 	int	i;
 
-	if (str == NULL)
-		return (ft_putstr("(null)"));
 	i = 0;
+	if (!str)
+		return (write(1, "(null)", 6));
 	while (str[i] != '\0')
 	{
-		if (ft_putchar(str[i]) == -1)
-			return (-1);
+		write(1, &str[i], 1);
 		i++;
 	}
 	return (i);

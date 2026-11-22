@@ -36,7 +36,6 @@ static int	ft_conversion(char c, va_list *ap)
 int	ft_printf(const char *str, ...)
 {
 	int		count;
-	int		ret;
 	int		i;
 	va_list	ap;
 
@@ -45,17 +44,17 @@ int	ft_printf(const char *str, ...)
 	count = 0;
 	i = 0;
 	va_start(ap, str);
-	while (str[i] != '\0' && count != -1)
+	while (str[i] != '\0')
 	{
-		ret = 0;
-		if (str[i] == '%' && str[i + 1] != '\0')
-			ret = ft_conversion(str[++i], &ap);
-		else if (str[i] != '%')
-			ret = ft_putchar(str[i]);
-		if (ret == -1)
-			count = -1;
+		if (str[i] == '%')
+		{
+			if (str[i + 1] == '\0')
+				break ;
+			count += ft_conversion(str[i + 1], &ap);
+			i++;
+		}
 		else
-			count += ret;
+			count += ft_putchar(str[i]);
 		i++;
 	}
 	va_end(ap);

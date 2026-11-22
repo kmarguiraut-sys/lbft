@@ -78,9 +78,9 @@ cc -Wall -Wextra -Werror main.c -L. -lftprintf -o demo
 | `ft_printf.c`          | `ft_printf` reads the format; `ft_conversion` (static) picks the right function for each conversion |
 | `ft_putchar.c`         | writes one character, returns `1` or `-1`                                                           |
 | `ft_putstr.c`          | writes a string, or `(null)`                                                                        |
-| `ft_putnbr.c`          | `%d` / `%i`, with `ft_nbrlen` (static) to count the characters                                      |
-| `ft_unsigned_putnbr.c` | `%u`, with `ft_unsigned_length` (static)                                                            |
-| `ft_putnbase.c`        | writes a number in any valid base: used for `%x`, `%X` and `%p`                                     |
+| `ft_putnbr.c`          | `%d` / `%i`                                                                                         |
+| `ft_unsigned_putnbr.c` | `%u`                                                                                                |
+| `ft_putnbase.c`        | writes a number in base 16 with the given digits: used for `%x`, `%X` and `%p`                      |
 | `ft_putptr.c`          | `%p`: `0x` followed by the address in base 16                                                       |
 | `ft_isspace.c`         | helper used to reject whitespace in a base                                                          |
 
@@ -89,25 +89,25 @@ cc -Wall -Wextra -Werror main.c -L. -lftprintf -o demo
 `ft_printf` walks the format string once, from left to right, with an index `i`:
 
 1. A normal character goes straight to `ft_putchar`.
-2. A `%` followed by a character: `i` moves to that character and `ft_conversion` is called. It compares the letter with each supported conversion (a simple chain of `if`), reads **one** argument with `va_arg` and calls the matching output function.
-3. Each function returns how many characters it printed, and `ft_printf` adds it to its counter. If one of them returns `-1`, the loop stops, `va_end` is called and `ft_printf` returns `-1`.
+2. A `%` followed by a character: `ft_conversion` is called with that character, then `i` skips it. `ft_conversion` compares the letter with each supported conversion (a simple chain of `if`), reads **one** argument with `va_arg` and calls the matching output function. A `%` at the very end of the string stops the loop.
+3. Each function returns how many characters it printed, and `ft_printf` adds it to `count`, which it returns at the end.
 
 The argument list is read through a `va_list` **passed by pointer** (`&ap`) to `ft_conversion`. That way `ft_printf` and `ft_conversion` move the same cursor. Passing a `va_list` by value is not portable: depending on the platform, the caller's cursor may not move, and the next conversion would read the same argument again (this happens on macOS arm64).
 
 ### Printing numbers: recursion instead of a buffer
 
-To print a number in a base of size `n`:
+To print a number in base 16 (base 10 works the same way with `10`):
 
-- `nbr / n` is the number without its last digit,
-- `nbr % n` is the last digit (its index in the base string).
+- `nbr / 16` is the number without its last digit,
+- `nbr % 16` is the last digit (its index in the base string).
 
-`ft_putnbase_recursive` first calls itself with `nbr / n`, then writes `base[nbr % n]`. The calls go down to the first digit, and the digits are written on the way back up, in the right order. Example with `300` in hexadecimal: `300 → 18 → 1`, then it writes `1`, `2`, `c`.
+`ft_putnbase` first calls itself with `nbr / 16`, then writes `base[nbr % 16]`. The calls go down to the first digit, and the digits are written on the way back up, in the right order. Example with `300`: `300 → 18 → 1`, then it writes `1`, `2`, `c`. Each call adds the characters it wrote to `len`, so the total length comes back up with the recursion and no separate length function is needed.
 
 Why this choice:
 
 - **No memory allocation and no temporary array.** The only "data structure" is the call stack. Nothing can leak and there is nothing to free.
 - **Small, bounded depth.** An `unsigned long` (64 bits) has at most 16 hexadecimal digits and 20 decimal digits, so the recursion never goes deeper than 20 calls.
-- **One generic function for several conversions.** `ft_putnbase` is reused by `%x`, `%X` and `%p`, just by changing the base string. It first checks that the base is valid: at least 2 symbols, no duplicates, no `+`, `-` or whitespace. A base of size 1 would make the recursion endless (`nbr / 1 == nbr`).
+- **One function for several conversions.** `ft_putnbase` is reused by `%x`, `%X` and `%p`, just by changing the digit string (`"0123456789abcdef"` or `"0123456789ABCDEF"`). The base is always 16 and the strings are written in the code, so there is nothing to validate.
 - **`INT_MIN`.** `ft_putnbr` copies the `int` into a `long` before changing its sign, because `-(-2147483648)` does not fit in an `int`.
 
 ## Resources

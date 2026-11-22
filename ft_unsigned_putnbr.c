@@ -12,26 +12,13 @@
 
 #include "ft_printf.h"
 
-static int	ft_unsigned_length(unsigned int n)
-{
-	int	i;
-
-	i = 0;
-	if (n == 0)
-		return (1);
-	while (n)
-	{
-		i++;
-		n /= 10;
-	}
-	return (i);
-}
-
 int	ft_unsigned_putnbr(unsigned int n)
 {
-	if (n > 9 && ft_unsigned_putnbr(n / 10) == -1)
-		return (-1);
-	if (ft_putchar(n % 10 + '0') == -1)
-		return (-1);
-	return (ft_unsigned_length(n));
+	int	len;
+
+	len = 0;
+	if (n > 9)
+		len += ft_unsigned_putnbr(n / 10);
+	len += ft_putchar(n % 10 + '0');
+	return (len);
 }

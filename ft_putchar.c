@@ -6,7 +6,7 @@
 /*   By: kmarguir <kmarguir@learner.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/11/15 20:08:44 by kmarguir          #+#    #+#             */
-/*   Updated: 2026/11/22 12:15:38 by kmarguir         ###   ########.fr       */
+/*   Updated: 2026/11/22 19:22:53 by kmarguir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,6 @@
 
 int	ft_putchar(char c)
 {
-	int	wrd;
-
-	wrd = write(1, &c, 1);
-	if (wrd == -1)
-		return (-1);
+	write(1, &c, 1);
 	return (1);
 }
